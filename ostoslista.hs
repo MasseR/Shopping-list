@@ -9,6 +9,7 @@ import qualified Data.Map as M
 import Data.List (foldl')
 import System.Environment
 import Data.Char (toUpper)
+import Transaction
 
 type ShoppingList = Map String Bool
 
@@ -53,4 +54,4 @@ html list = let items = M.keys (M.filter id list) in [hamlet|
   |]
 
 main ::  IO ()
-main = runCGI (handleErrors cgiMain)
+main = withFileTransaction "/tmp/ostoslista.lock" (runCGI (handleErrors cgiMain))
