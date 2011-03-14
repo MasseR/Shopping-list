@@ -1,13 +1,15 @@
 TESTDEST=/var/www/lighttpd
 DEST=${HOME}/programming/haskell/site/ostoslista
-all: ostoslista.cgi
+all: ostoslista-debug
 
 .PHONY: testinstall install uninstall clean
 install: ostoslista-static
+	mkdir -p ${DEST}/cgi-bin
 	install ostoslista-static ${DEST}/cgi-bin/ostoslista.cgi
+	strip ${DEST}/cgi-bin/ostoslista.cgi
 
-testinstall: ostoslista.cgi list
-	install -o lighttpd -g lighttpd ostoslista.cgi ${TESTDEST}/ostoslista.cgi
+testinstall: ostoslista-debug list
+	install -o lighttpd -g lighttpd ostoslista-debug ${TESTDEST}/ostoslista.cgi
 	strip ${TESTDEST}/ostoslista.cgi
 	install -o lighttpd -g lighttpd list ${TESTDEST}/list
 
@@ -18,13 +20,14 @@ uninstall:
 	rm -f ${TESTDEST}/list
 
 clean:
-	rm -f ostoslista.cgi
+	rm -f ostoslista-static
+	rm -f ostoslista-debug
 	rm -f ostoslista.hi
 	rm -f ostoslista.o
 	rm -f list
 
-ostoslista.cgi: ostoslista.hs
-	ghc --make -O2 -o ostoslista.cgi ostoslista.hs
+ostoslista-debug: ostoslista.hs
+	ghc --make -O2 -rtsopts -o $@ ostoslista.hs
 
 ostoslista-static: ostoslista.hs
-	ghc --make -O2 -o ostoslista-static -static -optl-static -optl-pthread ostoslista.hs
+	ghc --make -O2 -o $@ -static -optl-static -optl-pthread ostoslista.hs
