@@ -49,7 +49,7 @@ html list = let items = M.keys (M.filter id list) in [hamlet|
   <body>
     <h1>Shopping list
     <form method=POST>
-      <input type=text name=append>
+      <input #addfocus type=text name=append>
       <input type=submit value="Add new">
     <form method=POST>
       <ul id=items>
@@ -57,6 +57,8 @@ html list = let items = M.keys (M.filter id list) in [hamlet|
              <li>
                <input type=checkbox name=list value="#{item}">#{item}
       <input type=submit value="Clear selected">
+   <script type="application/javascript">
+     window.document.getElementById("addfocus").focus();
   |]
 
 main ::  IO ()
