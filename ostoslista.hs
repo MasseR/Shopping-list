@@ -3,12 +3,14 @@ import Network.CGI
 import Text.Hamlet
 import Text.Cassius
 import qualified Data.ByteString.Char8 as BS8
-import System.Directory (doesFileExist)
+import System.Directory (copyFile)
 import Data.Map (Map)
 import qualified Data.Map as M
 import Data.List (foldl')
 import System.Environment
 import Data.Char (toUpper)
+import Control.Exception.Base (bracket)
+import System.IO (openTempFile, hClose)
 import Transaction
 
 type ShoppingList = Map String Bool
@@ -17,17 +19,23 @@ titleCase (a:xs) = toUpper a : xs
 
 appendNew :: ShoppingList -> Maybe String -> CGI CGIResult
 appendNew _ Nothing = outputNothing
-appendNew list (Just x) = liftIO (BS8.writeFile "list" $ BS8.pack $ show (M.insert (titleCase x) True list)) >> redirect "ostoslista.cgi"
+appendNew list (Just x) = liftIO (safeWrite $ BS8.pack $ show (M.insert (titleCase x) True list)) >> redirect "ostoslista.cgi"
+
+safeWrite :: BS8.ByteString -> IO ()
+safeWrite c = bracket (openTempFile "/tmp" "list.tmp")
+    (\(path, h) -> hClose h >> copyFile path "/tmp/list")
+    (\(_, h) -> BS8.hPutStr h c)
 
 check :: ShoppingList -> [String] -> CGI CGIResult
 check list x | not (null x) = do
-  liftIO $ BS8.writeFile "list" $ BS8.pack $ show $ foldl' (\a b -> M.update (\_ -> Just False) (titleCase b) a) list x
+  liftIO $ safeWrite $ BS8.pack $
+	show $ foldl' (flip (M.update (const (Just False)) . titleCase)) list x
   redirect "ostoslista.cgi"
 	     | otherwise = outputNothing
 
 cgiMain :: CGI CGIResult
 cgiMain = do
-  list <- (read . BS8.unpack) `fmap` (liftIO $ BS8.readFile "list")
+  list <- (read . BS8.unpack) `fmap` (liftIO $ BS8.readFile "/tmp/list")
   getInput "append" >>= appendNew list
   getMultiInput "list" >>= check list
   outputFPS $ renderHtml (html list)
