@@ -1,13 +1,11 @@
 {-# LANGUAGE OverloadedStrings, QuasiQuotes #-}
 import Network.CGI
 import Text.Hamlet
-import Text.Cassius
 import qualified Data.ByteString.Char8 as BS8
 import System.Directory (copyFile)
 import Data.Map (Map)
 import qualified Data.Map as M
 import Data.List (foldl')
-import System.Environment
 import Data.Char (toUpper)
 import Control.Exception.Base (bracket)
 import System.IO (openTempFile, hClose)
