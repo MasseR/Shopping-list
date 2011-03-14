@@ -8,16 +8,19 @@ import Data.Map (Map)
 import qualified Data.Map as M
 import Data.List (foldl')
 import System.Environment
+import Data.Char (toUpper)
 
 type ShoppingList = Map String Bool
 
+titleCase (a:xs) = toUpper a : xs
+
 appendNew :: ShoppingList -> Maybe String -> CGI CGIResult
 appendNew _ Nothing = outputNothing
-appendNew list (Just x) = liftIO (BS8.writeFile "list" $ BS8.pack $ show (M.insert x True list)) >> redirect "ostoslista.cgi"
+appendNew list (Just x) = liftIO (BS8.writeFile "list" $ BS8.pack $ show (M.insert (titleCase x) True list)) >> redirect "ostoslista.cgi"
 
 check :: ShoppingList -> [String] -> CGI CGIResult
 check list x | not (null x) = do
-  liftIO $ BS8.writeFile "list" $ BS8.pack $ show $ foldl' (\a b -> M.update (\_ -> Just False) b a) list x
+  liftIO $ BS8.writeFile "list" $ BS8.pack $ show $ foldl' (\a b -> M.update (\_ -> Just False) (titleCase b) a) list x
   redirect "ostoslista.cgi"
 	     | otherwise = outputNothing
 
