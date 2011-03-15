@@ -3,11 +3,11 @@ import System.Directory (createDirectory, removeDirectory)
 import Control.Concurrent (threadDelay)
 import System.IO.Error (isAlreadyExistsError)
 import Control.Exception (finally)
+import Control.Monad (when)
 
-tryLock file = catch (createDirectory file) (\e -> if isAlreadyExistsError e then putStrLn "Waiting" >> threadDelay 1000 >> tryLock file else return ())
+tryLock file = catch (createDirectory file) (\e -> when (isAlreadyExistsError e) $ putStrLn "Waiting" >> threadDelay 1000 >> tryLock file)
 
 withFileTransaction ::  FilePath -> IO b -> IO b
 withFileTransaction file f = do
   tryLock file
-  a <- (f) `finally` removeDirectory file
-  return a
+  f `finally` removeDirectory file
