@@ -4,9 +4,9 @@ all: ostoslista-debug
 
 .PHONY: testinstall install uninstall clean
 install: ostoslista-static
-	mkdir -p ${DEST}/cgi-bin
-	install ostoslista-static ${DEST}/cgi-bin/ostoslista.cgi
-	strip ${DEST}/cgi-bin/ostoslista.cgi
+	mkdir -p ${DEST}/
+	install ostoslista-static ${DEST}/ostoslista.cgi
+	strip ${DEST}/ostoslista.cgi
 
 testinstall: ostoslista-debug list
 	install -o lighttpd -g lighttpd ostoslista-debug ${TESTDEST}/ostoslista.cgi
