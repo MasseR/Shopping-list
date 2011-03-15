@@ -26,8 +26,8 @@ clean:
 	rm -f ostoslista.o
 	rm -f list
 
-ostoslista-debug: ostoslista.hs
+ostoslista-debug: ostoslista.hs Transaction.hs
 	ghc --make -O2 -rtsopts -o $@ ostoslista.hs
 
-ostoslista-static: ostoslista.hs
+ostoslista-static: ostoslista.hs Transaction.hs
 	ghc --make -O2 -o $@ -static -optl-static -optl-pthread ostoslista.hs
