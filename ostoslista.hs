@@ -9,6 +9,7 @@ import Data.List (foldl')
 import Data.Char (toUpper)
 import Control.Exception.Base (bracket)
 import System.IO (openTempFile, hClose)
+import System.IO.Error (isDoesNotExistError)
 import Transaction
 
 type ShoppingList = Map String Bool
@@ -24,6 +25,9 @@ safeWrite c = bracket (openTempFile "/tmp" "list.tmp")
     (\(path, h) -> hClose h >> copyFile path "/tmp/list")
     (\(_, h) -> BS8.hPutStr h c)
 
+safeRead :: FilePath -> IO BS8.ByteString
+safeRead path = catch (BS8.readFile path) (\e -> if isDoesNotExistError e then return "fromList []" else ioError e)
+
 check :: ShoppingList -> [String] -> CGI CGIResult
 check list x | not (null x) = do
   liftIO $ safeWrite $ BS8.pack $
@@ -33,7 +37,7 @@ check list x | not (null x) = do
 
 cgiMain :: CGI CGIResult
 cgiMain = do
-  list <- (read . BS8.unpack) `fmap` (liftIO $ BS8.readFile "/tmp/list")
+  list <- (read . BS8.unpack) `fmap` (liftIO $ safeRead "/tmp/list")
   getInput "append" >>= appendNew list
   getMultiInput "list" >>= check list
   outputFPS $ renderHtml (html list)
