@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings, QuasiQuotes #-}
-import Network.CGI
+import Network.CGI.Text
 import Text.Hamlet
 import qualified Data.ByteString.Char8 as BS8
 import System.Directory
@@ -10,23 +10,17 @@ import Data.Char (toUpper)
 import Control.Exception.Base (bracket)
 import System.IO (openTempFile, hClose)
 import System.IO.Error (isDoesNotExistError)
-import qualified Data.Text.Lazy.Encoding as TE(decodeUtf8)
 import qualified Data.Text.Lazy as T
 import qualified Data.Text.Lazy.IO as TI
 import Transaction
 
-type ShoppingList = Map T.Text Bool
+type ShoppingList = Map Text Bool
 
-titleCase t =
-  let a = toUpper (T.head t)
-      xs = T.tail t
-  in a `T.cons` xs
-
-appendNew :: ShoppingList -> Maybe T.Text -> CGI CGIResult
+appendNew :: ShoppingList -> Maybe Text -> CGI CGIResult
 appendNew _ Nothing = outputNothing
 appendNew list (Just x) = liftIO (safeWrite $ T.pack $ show (M.insert (titleCase x) True list)) >> redirect "ostoslista.cgi"
 
-safeWrite :: T.Text -> IO ()
+safeWrite :: Text -> IO ()
 safeWrite c = bracket (openTempFile "/tmp" "list.tmp")
     (\(path, h) -> hClose h
       >> copyFile path "/tmp/list"
@@ -36,7 +30,7 @@ safeWrite c = bracket (openTempFile "/tmp" "list.tmp")
 safeRead :: FilePath -> IO BS8.ByteString
 safeRead path = catch (BS8.readFile path) (\e -> if isDoesNotExistError e then return "fromList []" else ioError e)
 
-check :: ShoppingList -> [T.Text] -> CGI CGIResult
+check :: ShoppingList -> [Text] -> CGI CGIResult
 check list x | not (null x) = do
   liftIO $ safeWrite $ T.pack $
 	show $ foldl' (flip (M.update (const (Just False)) . titleCase)) list x
@@ -46,8 +40,8 @@ check list x | not (null x) = do
 cgiMain :: CGI CGIResult
 cgiMain = do
   list <- (read . BS8.unpack) `fmap` (liftIO $ safeRead "/tmp/list")
-  getInputFPS "append" >>= \x -> appendNew list (fmap TE.decodeUtf8 x)
-  getMultiInputFPS "list" >>= check list . map TE.decodeUtf8
+  getInput "append" >>= appendNew list
+  getMultiInput "list" >>= check list
   setHeader "Content-Type" "text/html; charset=utf-8"
   outputFPS $ renderHtml (html list)
 
