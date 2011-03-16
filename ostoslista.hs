@@ -2,7 +2,7 @@
 import Network.CGI
 import Text.Hamlet
 import qualified Data.ByteString.Char8 as BS8
-import System.Directory (copyFile)
+import System.Directory
 import Data.Map (Map)
 import qualified Data.Map as M
 import Data.List (foldl')
@@ -22,7 +22,9 @@ appendNew list (Just x) = liftIO (safeWrite $ BS8.pack $ show (M.insert (titleCa
 
 safeWrite :: BS8.ByteString -> IO ()
 safeWrite c = bracket (openTempFile "/tmp" "list.tmp")
-    (\(path, h) -> hClose h >> copyFile path "/tmp/list")
+    (\(path, h) -> hClose h
+      >> copyFile path "/tmp/list"
+      >> removeFile path)
     (\(_, h) -> BS8.hPutStr h c)
 
 safeRead :: FilePath -> IO BS8.ByteString
