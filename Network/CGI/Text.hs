@@ -1,8 +1,7 @@
 -- | A wrapper around the Network.CGI module. Turns the original
 -- functions `getInput` and getMultiInput` into their Text equivalents.
 module Network.CGI.Text (
-    titleCase
-  , Text
+    Text
   , getInput
   , getMultiInput
   , module Network.CGI
@@ -15,15 +14,6 @@ import qualified Data.Text.Lazy as T
 import qualified Data.Text.Lazy.IO as TI
 import Network.CGI hiding (getInput, getMultiInput)
 import qualified Network.CGI (getInputFPS, getMultiInputFPS)
-import Data.Char (toUpper)
-
--- |The 'titleCase' function turns a text into title case.
--- For example "hello" is changed into "Hello".
-titleCase :: Text -> Text
-titleCase t =
-  let a = toUpper (T.head t)
-      xs = T.tail t
-  in a `T.cons` xs
 
 -- |A wrapper for the `getInput` function. The function decodes the
 -- ByteString from `getInputFPS` into Text. The form field must be

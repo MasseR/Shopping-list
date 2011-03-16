@@ -20,14 +20,13 @@ uninstall:
 	rm -f ${TESTDEST}/list
 
 clean:
+	find ${PWD} -iname '*.hi' -or -iname '*.o' | xargs rm
 	rm -f ostoslista-static
 	rm -f ostoslista-debug
-	rm -f ostoslista.hi
-	rm -f ostoslista.o
 	rm -f list
 
-ostoslista-debug: ostoslista.hs Transaction.hs
+ostoslista-debug: ostoslista.hs Transaction.hs Data/ShoppingList.hs Data/ShoppingList/Persist.hs Network/CGI/Text.hs
 	ghc --make -O2 -rtsopts -o $@ ostoslista.hs
 
-ostoslista-static: ostoslista.hs Transaction.hs
+ostoslista-static: ostoslista.hs Transaction.hs Transaction.hs Data/ShoppingList.hs Data/ShoppingList/Persist.hs Network/CGI/Text.hs
 	ghc --make -O2 -o $@ -static -optl-static -optl-pthread ostoslista.hs
