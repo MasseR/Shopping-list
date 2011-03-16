@@ -40,6 +40,7 @@ cgiMain = do
   list <- (read . BS8.unpack) `fmap` (liftIO $ safeRead "/tmp/list")
   getInput "append" >>= appendNew list
   getMultiInput "list" >>= check list
+  setHeader "Content-Type" "text/html; charset=utf-8"
   outputFPS $ renderHtml (html list)
 
 html :: ShoppingList -> Text.Hamlet.Html
