@@ -34,13 +34,16 @@ html list = let items = getEnabled list in [hamlet|
   <head>
     <meta charset=utf-8 />
     <meta name="viewport" content="width=device-width;" />
-    <style type="text/css">
-       #items > li { list-style-type: none; }
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
+    <link rel="stylesheet" type="text/css" href="css/jquery.autocomplete.css" />
+    <script type="application/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js">
+    <script type="application/javascript" src="js/jquery.autocomplete.js">
+    <script type="application/javascript" src="js/autocomplete.js">
     <title>Shopping list
   <body>
     <h1>Shopping list
     <form method=POST>
-      <input #addfocus type=text name=append>
+      <input #input type=text name=append>
       <input type=submit value="Add new">
     <form method=POST>
       <ul id=items>
@@ -48,8 +51,7 @@ html list = let items = getEnabled list in [hamlet|
              <li>
                <input type=checkbox name=list value="#{item}">#{item}
       <input type=submit value="Clear selected">
-   <script type="application/javascript">
-     window.document.getElementById("addfocus").focus();
+   <script type="application/javascript" src="js/setfocus.js">
   |]
 
 main ::  IO ()

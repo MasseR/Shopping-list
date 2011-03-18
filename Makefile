@@ -1,8 +1,11 @@
 TESTDEST=/var/www/lighttpd
 DEST=${HOME}/programming/haskell/site/ostoslista
+CSS=css/style.css css/jquery.autocomplete.css
+JS=js/setfocus.js js/autocomplete.js js/jquery.autocomplete.js
+STATIC=${CSS} ${JS}
 all: ostoslista-debug
 
-.PHONY: testinstall install uninstall clean
+.PHONY: testinstall install uninstall clean test
 install: ostoslista-static
 	mkdir -p ${DEST}/
 	install ostoslista-static ${DEST}/ostoslista.cgi
@@ -10,6 +13,10 @@ install: ostoslista-static
 
 testinstall: ostoslista-debug list
 	install -o lighttpd -g lighttpd ostoslista-debug ${TESTDEST}/ostoslista.cgi
+	for file in $(STATIC); do\
+	    echo "Installing  $$file"; \
+	    install -o lighttpd -g lighttpd $$file ${TESTDEST}/$$file; \
+	done;
 	strip ${TESTDEST}/ostoslista.cgi
 	install -o lighttpd -g lighttpd list ${TESTDEST}/list
 
