@@ -2,6 +2,7 @@
 -- functions `getInput` and getMultiInput` into their Text equivalents.
 module Network.CGI.Text (
     Text
+  , outputText
   , getInput
   , getMultiInput
   , module Network.CGI
@@ -14,6 +15,9 @@ import qualified Data.Text.Lazy as T
 import qualified Data.Text.Lazy.IO as TI
 import Network.CGI hiding (getInput, getMultiInput)
 import qualified Network.CGI (getInputFPS, getMultiInputFPS)
+
+outputText :: MonadCGI m => Text -> m CGIResult
+outputText = output . T.unpack
 
 -- |A wrapper for the `getInput` function. The function decodes the
 -- ByteString from `getInputFPS` into Text. The form field must be
