@@ -9,6 +9,8 @@ module Data.ShoppingList (
   , getAllAsJSON
   , getEnabledAsJSON
   , getFilteredAsJSON
+  , getAllAsPlain
+  , getFilteredAsPlain
   , empty
   )
 where
@@ -36,9 +38,15 @@ empty = M.empty
 getAsJSON ::  [Text] -> Text
 getAsJSON = T.pack . encode
 
+getAsPlain :: [Text] -> Text
+getAsPlain = T.unlines
+
 -- |Return all the items from history as JSON
 getAllAsJSON :: ShoppingList -> Text
 getAllAsJSON = getAsJSON . getAll
+
+getAllAsPlain :: ShoppingList -> Text
+getAllAsPlain = getAsPlain . getAll
 
 -- |Return currently enabled items as JSON
 getEnabledAsJSON :: ShoppingList -> Text
@@ -46,6 +54,9 @@ getEnabledAsJSON = getAsJSON . getEnabled
 
 getFilteredAsJSON ::  Text -> ShoppingList -> Text
 getFilteredAsJSON = (getAsJSON .) . getFiltered
+
+getFilteredAsPlain :: Text -> ShoppingList -> Text
+getFilteredAsPlain = (getAsPlain .) . getFiltered
 
 -- |Return all the items as text
 getAll :: ShoppingList -> [Text]

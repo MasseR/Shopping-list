@@ -6,8 +6,8 @@ import Data.ShoppingList
 import Data.ShoppingList.Persist
 
 autoComplete :: Maybe Text -> ShoppingList -> Text
-autoComplete Nothing list = getAllAsJSON list
-autoComplete (Just x) list = getFilteredAsJSON x list
+autoComplete Nothing list = getAllAsPlain list
+autoComplete (Just x) list = getFilteredAsPlain x list
 
 cgiMain = do
   list <- liftIO $ loadList
