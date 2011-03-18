@@ -4,6 +4,8 @@ module Data.ShoppingList (
   , disableMulti
   , getEnabled
   , ShoppingList
+  , getAllAsJSON
+  , getEnabledAsJSON
   )
 where
 
@@ -13,8 +15,25 @@ import Data.Text.Lazy (Text)
 import qualified Data.Text.Lazy as T
 import Data.Char (toUpper)
 import Data.List (foldl')
+import Text.JSON
+
+instance JSON T.Text where
+  showJSON = showJSON . T.unpack
+  readJSON = fmap T.pack . readJSON
 
 type ShoppingList = Map Text Bool
+
+getAsJSON ::  [Text] -> Text
+getAsJSON = T.pack . encode
+
+getAllAsJSON :: ShoppingList -> Text
+getAllAsJSON = getAsJSON . getAll
+
+getEnabledAsJSON :: ShoppingList -> Text
+getEnabledAsJSON = getAsJSON . getEnabled
+
+getAll :: ShoppingList -> [Text]
+getAll = M.keys
 
 getEnabled :: ShoppingList -> [Text]
 getEnabled = M.keys . M.filter id
