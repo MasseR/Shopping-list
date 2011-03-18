@@ -4,9 +4,11 @@ module Data.ShoppingList (
   , disable
   , disableMulti
   , getEnabled
+  , getFiltered
   , ShoppingList
   , getAllAsJSON
   , getEnabledAsJSON
+  , getFilteredAsJSON
   , empty
   )
 where
@@ -42,9 +44,15 @@ getAllAsJSON = getAsJSON . getAll
 getEnabledAsJSON :: ShoppingList -> Text
 getEnabledAsJSON = getAsJSON . getEnabled
 
+getFilteredAsJSON ::  Text -> ShoppingList -> Text
+getFilteredAsJSON = (getAsJSON .) . getFiltered
+
 -- |Return all the items as text
 getAll :: ShoppingList -> [Text]
 getAll = M.keys
+
+getFiltered :: Text -> ShoppingList -> [Text]
+getFiltered x s = M.keys $ M.filterWithKey (\k _ -> T.toLower x `T.isPrefixOf` T.toLower k) s
 
 -- |Return currently enabled items as text
 getEnabled :: ShoppingList -> [Text]
