@@ -3,15 +3,24 @@ DEST=${HOME}/programming/haskell/site/ostoslista
 CSS=css/style.css css/jquery.autocomplete.css
 JS=js/setfocus.js js/autocomplete.js js/jquery.autocomplete.js
 STATIC=${CSS} ${JS}
-all: ostoslista-debug completion-debug
+all: debug
+
+debug: ostoslista-debug completion-debug
+deploy: ostoslista-static completion-static
 
 .PHONY: testinstall install uninstall clean test
-install: ostoslista-static
+install: deploy
 	mkdir -p ${DEST}/
 	install ostoslista-static ${DEST}/ostoslista.cgi
+	install completion-static ${DEST}/autocomplete.cgi
+	for file in $(STATIC); do\
+	    echo "Installing  $$file"; \
+	    install -o lighttpd -g lighttpd $$file ${DEST}/$$file; \
+	done;
 	strip ${DEST}/ostoslista.cgi
+	strip ${DEST}/autocomplete.cgi
 
-testinstall: ostoslista-debug completion-debug list
+testinstall: debug
 	install -o lighttpd -g lighttpd ostoslista-debug ${TESTDEST}/ostoslista.cgi
 	install -o lighttpd -g lighttpd completion-debug ${TESTDEST}/autocomplete.cgi
 	for file in $(STATIC); do\
@@ -19,7 +28,6 @@ testinstall: ostoslista-debug completion-debug list
 	    install -o lighttpd -g lighttpd $$file ${TESTDEST}/$$file; \
 	done;
 	strip ${TESTDEST}/ostoslista.cgi
-	install -o lighttpd -g lighttpd list ${TESTDEST}/list
 
 list:
 	echo "[]" > list
@@ -37,6 +45,9 @@ clean:
 
 completion-debug: autocomplete.hs Data/ShoppingList.hs
 	ghc --make -O2 -rtsopts -o $@ autocomplete.hs
+
+completion-static: autocomplete.hs Data/ShoppingList.hs
+	ghc --make -O2 -o $@ -optl-static -optl-pthread autocomplete.hs
 
 ostoslista-debug: ostoslista.hs Transaction.hs Data/ShoppingList.hs Data/ShoppingList/Persist.hs Network/CGI/Text.hs
 	ghc --make -O2 -rtsopts -o $@ ostoslista.hs
