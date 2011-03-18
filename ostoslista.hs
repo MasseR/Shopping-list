@@ -32,7 +32,8 @@ html list = let items = getEnabled list in [hamlet|
 !!!
 <html>
   <head>
-    <meta charset=utf-8>
+    <meta charset=utf-8 />
+    <meta name="viewport" content="width=device-width;" />
     <style type="text/css">
        #items > li { list-style-type: none; }
     <title>Shopping list
