@@ -1,3 +1,4 @@
+-- |Pure interface for the Shopping list
 module Data.ShoppingList (
     enable
   , disable
@@ -6,6 +7,7 @@ module Data.ShoppingList (
   , ShoppingList
   , getAllAsJSON
   , getEnabledAsJSON
+  , empty
   )
 where
 
@@ -21,20 +23,30 @@ instance JSON T.Text where
   showJSON = showJSON . T.unpack
   readJSON = fmap T.pack . readJSON
 
+-- | Type alias for the shopping list.
 type ShoppingList = Map Text Bool
 
+-- |Empty shopping list
+empty :: ShoppingList
+empty = M.empty
+
+-- |Return a list of items as JSON
 getAsJSON ::  [Text] -> Text
 getAsJSON = T.pack . encode
 
+-- |Return all the items from history as JSON
 getAllAsJSON :: ShoppingList -> Text
 getAllAsJSON = getAsJSON . getAll
 
+-- |Return currently enabled items as JSON
 getEnabledAsJSON :: ShoppingList -> Text
 getEnabledAsJSON = getAsJSON . getEnabled
 
+-- |Return all the items as text
 getAll :: ShoppingList -> [Text]
 getAll = M.keys
 
+-- |Return currently enabled items as text
 getEnabled :: ShoppingList -> [Text]
 getEnabled = M.keys . M.filter id
 
@@ -46,11 +58,14 @@ titleCase t =
       xs = T.tail t
   in a `T.cons` xs
 
+-- |Enable an item in the database
 enable :: Text -> ShoppingList -> ShoppingList
 enable = flip M.insert True . titleCase
 
+-- |Disable an item in the database
 disable ::  ShoppingList -> Text -> ShoppingList
 disable = flip (M.update (const (Just False)) . titleCase)
 
+-- |Disable multiple items in the database
 disableMulti ::  ShoppingList -> [Text] -> ShoppingList
 disableMulti = foldl' disable
