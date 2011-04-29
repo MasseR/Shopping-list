@@ -15,12 +15,14 @@ import qualified Data.Text.Lazy as T
 import qualified Data.Text.Lazy.IO as TI
 import System.Directory
 
+dataFile = "list.db"
+
 -- |Safely write to disk using temporary files.
 -- The files are copied only if there were no errors
 safeWrite :: Text -> IO ()
 safeWrite c = bracket (openTempFile "/tmp" "list.tmp")
     (\(path, h) -> hClose h
-      >> copyFile path "/tmp/list"
+      >> copyFile path dataFile
       >> removeFile path)
     (\(_, h) -> TI.hPutStr h c)
 
@@ -40,4 +42,4 @@ saveList = safeWrite . serializeList
 -- |Loads the list. Implementation is not defined. Currently works by loading
 -- from a file
 loadList ::  IO ShoppingList
-loadList = (read . T.unpack) `fmap` (safeRead "/tmp/list")
+loadList = (read . T.unpack) `fmap` (safeRead dataFile)
