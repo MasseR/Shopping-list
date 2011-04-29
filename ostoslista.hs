@@ -51,7 +51,6 @@ html list = let items = getEnabled list in [hamlet|
              <li>
                <input type=checkbox name=list value="#{item}">#{item}
       <input type=submit value="Clear selected">
-   <script type="application/javascript" src="js/setfocus.js">
   |]
 
 main ::  IO ()
