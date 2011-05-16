@@ -7,9 +7,6 @@ module Data.ShoppingList (
   , getEnabled
   , getFiltered
   , ShoppingList
-  , getAllAsJSON
-  , getEnabledAsJSON
-  , getFilteredAsJSON
   , getAllAsPlain
   , getFilteredAsPlain
   , getAssoc
@@ -23,13 +20,8 @@ import Data.Text.Lazy (Text)
 import qualified Data.Text.Lazy as T
 import Data.Char (toUpper)
 import Data.List (foldl')
-import Text.JSON
 import Data.Typeable (Typeable)
 import Data.SafeCopy (deriveSafeCopy, base)
-
-instance JSON T.Text where
-  showJSON = showJSON . T.unpack
-  readJSON = fmap T.pack . readJSON
 
 -- | Type alias for the shopping list.
 newtype ShoppingList = S (Map Text Int) deriving (Typeable)
@@ -39,30 +31,14 @@ $(deriveSafeCopy 0 'base ''ShoppingList)
 empty :: ShoppingList
 empty = S M.empty
 
--- |Return a list of items as JSON
-getAsJSON ::  [Text] -> Text
-getAsJSON = T.pack . encode
-
 getAsPlain :: [Text] -> Text
 getAsPlain = T.unlines
-
--- |Return all the items from history as JSON
-getAllAsJSON :: ShoppingList -> Text
-getAllAsJSON = getAsJSON . getAll
 
 getAllAsPlain :: ShoppingList -> Text
 getAllAsPlain = getAsPlain . getAll
 
 getAssoc :: ShoppingList -> [(Text, Int)]
 getAssoc (S s) = M.assocs $ M.filter (>0) s
-
--- |Return currently enabled items as JSON
-getEnabledAsJSON :: ShoppingList -> Text
-getEnabledAsJSON = getAsJSON . getEnabled
-
-getFilteredAsJSON ::  Text -> ShoppingList -> Text
-getFilteredAsJSON x = getAsJSON . getFiltered x
-
 getFilteredAsPlain :: Text -> ShoppingList -> Text
 getFilteredAsPlain x = getAsPlain . getFiltered x
 
