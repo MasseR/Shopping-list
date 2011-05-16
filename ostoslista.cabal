@@ -48,6 +48,11 @@ Build-type:          Simple
 -- Constraint on the version of Cabal needed to build this package.
 Cabal-version:       >=1.2
 
+Flag static
+    Description:    Build statically
+    Default:        False
+Flag rts
+
 
 Executable ostoslista.cgi
   -- .hs or .lhs file containing the Main module.
@@ -61,6 +66,10 @@ Executable ostoslista.cgi
   
   -- Extra tools (e.g. alex, hsc2hs, ...) needed to build the source.
   -- Build-tools:         
+  if flag(static)
+    GHC-Options:    -optl-static -optl-pthread
+  if flag(rts)
+    GHC-Options:    -rtsopts
   
 
 Executable autocomplete.cgi
@@ -68,11 +77,15 @@ Executable autocomplete.cgi
   Main-is:             autocomplete.hs
   
   -- Packages needed in order to build this package.
-  Build-depends:       base >= 4 && <= 5, cgi, text, hamlet, directory, containers
+  Build-depends:       base >= 4 && <= 5, cgi, text, directory, containers
   
   -- Modules not exported by this package.
   -- Other-modules:       
   
   -- Extra tools (e.g. alex, hsc2hs, ...) needed to build the source.
   -- Build-tools:         
+  if flag(static)
+    GHC-Options:    -optl-static -optl-pthread
+  if flag(rts)
+    GHC-Options:    -rtsopts
 -- vim: expandtab
