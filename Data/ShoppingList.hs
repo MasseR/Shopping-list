@@ -31,7 +31,7 @@ instance JSON T.Text where
   readJSON = fmap T.pack . readJSON
 
 -- | Type alias for the shopping list.
-newtype ShoppingList = S (Map Text Bool) deriving (Typeable)
+newtype ShoppingList = S (Map Text Int) deriving (Typeable)
 $(deriveSafeCopy 0 'base ''ShoppingList)
 
 -- |Empty shopping list
@@ -71,7 +71,7 @@ getFiltered x (S s) = M.keys $ M.filterWithKey (\k _ -> T.toLower x `T.isPrefixO
 
 -- |Return currently enabled items as text
 getEnabled :: ShoppingList -> [Text]
-getEnabled (S s) = M.keys $ M.filter id s
+getEnabled (S s) = M.keys $ M.filter (> 0) s
 
 -- |The 'titleCase' function turns a text into title case.
 -- For example "hello" is changed into "Hello".
@@ -83,11 +83,13 @@ titleCase t =
 
 -- |Enable an item in the database
 enable :: Text -> ShoppingList -> ShoppingList
-enable x (S s) = S $ M.insert (titleCase x) True s
+enable x (S s) = S $ M.alter add (titleCase x) s
+  where add Nothing = Just 1
+        add (Just x) = Just $ succ x
 
 -- |Disable an item in the database
 disable ::  Text -> ShoppingList -> ShoppingList
-disable x (S s) = S $ M.update (const (Just False)) (titleCase x) s
+disable x (S s) = S $ M.update (const (Just 0)) (titleCase x) s
 
 -- |Disable multiple items in the database
 disableMulti ::  [Text] -> ShoppingList -> ShoppingList
