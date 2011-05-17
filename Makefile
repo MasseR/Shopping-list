@@ -49,8 +49,8 @@ completion-debug: autocomplete.hs Data/ShoppingList.hs
 completion-static: autocomplete.hs Data/ShoppingList.hs
 	ghc --make -O2 -o $@ -optl-static -optl-pthread autocomplete.hs
 
-ostoslista-debug: ostoslista.hs Transaction.hs Data/ShoppingList.hs Data/ShoppingList/Persist.hs Network/CGI/Text.hs
+ostoslista-debug: ostoslista.hs  Data/ShoppingList.hs Data/ShoppingList/Persist.hs Network/CGI/Text.hs
 	ghc --make -O2 -rtsopts -o $@ ostoslista.hs
 
-ostoslista-static: ostoslista.hs Transaction.hs Transaction.hs Data/ShoppingList.hs Data/ShoppingList/Persist.hs Network/CGI/Text.hs
+ostoslista-static: ostoslista.hs   Data/ShoppingList.hs Data/ShoppingList/Persist.hs Network/CGI/Text.hs
 	ghc --make -O2 -o $@ -static -optl-static -optl-pthread ostoslista.hs
