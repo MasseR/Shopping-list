@@ -1,3 +1,4 @@
+{-# LANGUAGE TemplateHaskell, DeriveDataTypeable #-}
 -- |Pure interface for the Shopping list
 module Data.ShoppingList (
     enable
@@ -22,17 +23,20 @@ import qualified Data.Text.Lazy as T
 import Data.Char (toUpper)
 import Data.List (foldl')
 import Text.JSON
+import Data.Typeable (Typeable)
+import Data.SafeCopy (deriveSafeCopy, base)
 
 instance JSON T.Text where
   showJSON = showJSON . T.unpack
   readJSON = fmap T.pack . readJSON
 
 -- | Type alias for the shopping list.
-type ShoppingList = Map Text Bool
+newtype ShoppingList = S (Map Text Bool) deriving (Typeable)
+$(deriveSafeCopy 0 'base ''ShoppingList)
 
 -- |Empty shopping list
 empty :: ShoppingList
-empty = M.empty
+empty = S M.empty
 
 -- |Return a list of items as JSON
 getAsJSON ::  [Text] -> Text
@@ -53,21 +57,21 @@ getEnabledAsJSON :: ShoppingList -> Text
 getEnabledAsJSON = getAsJSON . getEnabled
 
 getFilteredAsJSON ::  Text -> ShoppingList -> Text
-getFilteredAsJSON = (getAsJSON .) . getFiltered
+getFilteredAsJSON x = getAsJSON . getFiltered x
 
 getFilteredAsPlain :: Text -> ShoppingList -> Text
-getFilteredAsPlain = (getAsPlain .) . getFiltered
+getFilteredAsPlain x = getAsPlain . getFiltered x
 
 -- |Return all the items as text
 getAll :: ShoppingList -> [Text]
-getAll = M.keys
+getAll (S s) = M.keys s
 
 getFiltered :: Text -> ShoppingList -> [Text]
-getFiltered x s = M.keys $ M.filterWithKey (\k _ -> T.toLower x `T.isPrefixOf` T.toLower k) s
+getFiltered x (S s) = M.keys $ M.filterWithKey (\k _ -> T.toLower x `T.isPrefixOf` T.toLower k) s
 
 -- |Return currently enabled items as text
 getEnabled :: ShoppingList -> [Text]
-getEnabled = M.keys . M.filter id
+getEnabled (S s) = M.keys $ M.filter id s
 
 -- |The 'titleCase' function turns a text into title case.
 -- For example "hello" is changed into "Hello".
@@ -79,12 +83,12 @@ titleCase t =
 
 -- |Enable an item in the database
 enable :: Text -> ShoppingList -> ShoppingList
-enable = flip M.insert True . titleCase
+enable x (S s) = S $ M.insert (titleCase x) True s
 
 -- |Disable an item in the database
-disable ::  ShoppingList -> Text -> ShoppingList
-disable = flip (M.update (const (Just False)) . titleCase)
+disable ::  Text -> ShoppingList -> ShoppingList
+disable x (S s) = S $ M.update (const (Just False)) (titleCase x) s
 
 -- |Disable multiple items in the database
-disableMulti ::  ShoppingList -> [Text] -> ShoppingList
-disableMulti = foldl' disable
+disableMulti ::  [Text] -> ShoppingList -> ShoppingList
+disableMulti x s = foldr (disable) s x

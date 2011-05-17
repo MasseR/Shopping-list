@@ -1,31 +1,33 @@
-{-# LANGUAGE OverloadedStrings, QuasiQuotes #-}
+{-# LANGUAGE FlexibleContexts, GeneralizedNewtypeDeriving, OverloadedStrings, QuasiQuotes #-}
 module Main where
 import Network.CGI.Text
 import Text.Hamlet
 import Data.ShoppingList
 import Data.ShoppingList.Persist
-import Transaction
+import Control.Monad.State
+import Control.Monad.CatchIO
+import Data.Acid
 
-appendNew :: ShoppingList -> Maybe Text -> CGI CGIResult
-appendNew _ Nothing = outputNothing
-appendNew list (Just x) = do
-  liftIO $ saveList $ enable x list
+appendNew :: Maybe Text -> CGIT (StateT ShoppingList IO) CGIResult
+appendNew Nothing = outputNothing
+appendNew (Just x) = do
+  lift $ modify (enable x)
   redirect "ostoslista.cgi"
 
-check :: ShoppingList -> [Text] -> CGI CGIResult
-check list x
+check :: [Text] -> CGIT (StateT ShoppingList IO) CGIResult
+check x
   | not (null x) = do
-    liftIO $ saveList $ disableMulti list x
+    lift $ modify (disableMulti x)
     redirect "ostoslista.cgi"
   | otherwise = outputNothing
 
-cgiMain :: CGI CGIResult
+cgiMain :: CGIT (StateT ShoppingList IO) CGIResult
 cgiMain = do
-  list <- liftIO $ loadList
-  getInput "append" >>= appendNew list
-  getMultiInput "list" >>= check list
+  getInput "append" >>= appendNew
+  getMultiInput "list" >>= check
   setHeader "Content-Type" "text/html; charset=utf-8"
-  outputFPS $ renderHtml (html list)
+  l <- lift get
+  outputFPS $ renderHtml (html l)
 
 html :: ShoppingList -> Text.Hamlet.Html
 html list = let items = getEnabled list in [hamlet|
@@ -53,5 +55,7 @@ html list = let items = getEnabled list in [hamlet|
       <input type=submit value="Clear selected">
   |]
 
-main ::  IO ()
-main = withFileTransaction "/tmp/ostoslista.lock" (runCGI (handleErrors cgiMain))
+--main ::  IO ()
+main = do
+  a <- openAcidState empty
+  loadList a >>= execStateT (runCGI (handleErrors cgiMain )) >>= saveList a
