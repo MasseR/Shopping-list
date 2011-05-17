@@ -12,6 +12,7 @@ module Data.ShoppingList (
   , getFilteredAsJSON
   , getAllAsPlain
   , getFilteredAsPlain
+  , getAssoc
   , empty
   )
 where
@@ -51,6 +52,9 @@ getAllAsJSON = getAsJSON . getAll
 
 getAllAsPlain :: ShoppingList -> Text
 getAllAsPlain = getAsPlain . getAll
+
+getAssoc :: ShoppingList -> [(Text, Int)]
+getAssoc (S s) = M.assocs $ M.filter (>0) s
 
 -- |Return currently enabled items as JSON
 getEnabledAsJSON :: ShoppingList -> Text

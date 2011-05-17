@@ -1,12 +1,17 @@
 {-# LANGUAGE FlexibleContexts, GeneralizedNewtypeDeriving, OverloadedStrings, QuasiQuotes #-}
 module Main where
 import Network.CGI.Text
-import Text.Hamlet
+import qualified Text.Blaze.Html5 as H
+import qualified Text.Blaze.Html5.Attributes as A
+import Text.Blaze.Html5 ((!))
+import Text.Blaze.Renderer.Text
 import Data.ShoppingList
 import Data.ShoppingList.Persist
 import Control.Monad.State
 import Control.Monad.CatchIO
+import Data.Monoid
 import Data.Acid
+import qualified Data.Text.Lazy as T
 
 appendNew :: Maybe Text -> CGIT (StateT ShoppingList IO) CGIResult
 appendNew Nothing = outputNothing
@@ -27,33 +32,37 @@ cgiMain = do
   getMultiInput "list" >>= check
   setHeader "Content-Type" "text/html; charset=utf-8"
   l <- lift get
-  outputFPS $ renderHtml (html l)
+  outputText $ renderHtml (html l)
 
-html :: ShoppingList -> Text.Hamlet.Html
-html list = let items = getEnabled list in [hamlet|
-!!!
-<html>
-  <head>
-    <meta charset=utf-8 />
-    <meta name="viewport" content="width=device-width;" />
-    <link rel="stylesheet" type="text/css" href="css/style.css" />
-    <link rel="stylesheet" type="text/css" href="css/jquery.autocomplete.css" />
-    <script type="application/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js">
-    <script type="application/javascript" src="js/jquery.autocomplete.js">
-    <script type="application/javascript" src="js/autocomplete.js">
-    <title>Shopping list
-  <body>
-    <h1>Shopping list
-    <form method=POST>
-      <input #input type=text name=append>
-      <input type=submit value="Add new">
-    <form method=POST>
-      <ul id=items>
-         $forall item <- items
-             <li>
-               <input type=checkbox name=list value="#{item}">#{item}
-      <input type=submit value="Clear selected">
-  |]
+html :: ShoppingList -> H.Html
+html list = H.docTypeHtml $  do
+  H.head $ do
+    H.meta ! A.charset "utf-8"
+    H.meta ! A.name "viewport" ! A.content "width=device-width;"
+    mkstyles styles
+    mkscripts scripts
+    H.title "Shopping list"
+    H.body $ do
+      H.h1 "Shopping list"
+      H.form ! A.method "POST" $ do
+        H.input ! A.id "input" ! A.type_ "text" ! A.name "append"
+        H.input ! A.type_ "submit" ! A.name "Add new"
+      H.form ! A.method "POST" $ do
+        H.ul ! A.id "items" $
+          foldr (\x m -> m `mappend` item x) mempty items
+        H.input ! A.type_ "submit" ! A.value "Clear selected"
+  where
+    items = getAssoc list
+    styles = ["css/style.css", "css/jquery.autocomplete.css"]
+    scripts = ["http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" , "js/jquery.autocomplete.js" , "js/autocomplete.js"]
+    mkfun :: (H.AttributeValue -> H.Html) -> [Text] -> H.Html
+    mkfun f = foldr (\x m -> m `mappend` f x) mempty . map H.toValue
+    mkstyles = mkfun css
+    mkscripts = mkfun js
+    css x = H.link ! A.rel "stylesheet" ! A.type_ "text/css" ! A.href x
+    js x = H.script mempty ! A.type_ "application/javascript" ! A.src x
+    item x@(a,b) = H.li ((H.input ! A.name "list" ! A.type_ "checkbox" ! A.value (H.toValue a)) `mappend` itemPP x)
+    itemPP (a,b) = H.toHtml $ (T.unwords [a, "-", (T.pack $ show b)])
 
 --main ::  IO ()
 main = do
