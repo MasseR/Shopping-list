@@ -47,6 +47,8 @@ html list = H.docTypeHtml $  do
       H.form ! A.method "POST" $ do
         H.input ! A.id "input" ! A.type_ "text" ! A.name "append"
         H.input ! A.type_ "submit" ! A.name "Add new"
+      H.p "0 items hidden" ! A.style "display:none" ! A.id "hiddenitems"
+      H.a "show" ! A.href "#" ! A.id "show" ! A.style "display:none"
       H.form ! A.method "POST" $ do
         H.ul ! A.id "items" $
           foldr (\x m -> m `mappend` item x) mempty items
@@ -54,7 +56,11 @@ html list = H.docTypeHtml $  do
   where
     items = getAssoc list
     styles = ["css/style.css", "css/jquery.autocomplete.css"]
-    scripts = reverse ["http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" , "js/jquery.autocomplete.js" , "js/autocomplete.js"]
+    scripts = reverse [
+        "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"
+      , "js/jquery.autocomplete.js"
+      , "js/autocomplete.js"
+      , "js/hide.js"]
     mkfun :: (H.AttributeValue -> H.Html) -> [Text] -> H.Html
     mkfun f = foldr (\x m -> m `mappend` f x) mempty . map H.toValue
     mkstyles = mkfun css

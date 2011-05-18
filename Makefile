@@ -1,7 +1,7 @@
 TESTDEST=/var/www/lighttpd
 DEST=${HOME}/programming/haskell/site/ostoslista
 CSS=css/style.css css/jquery.autocomplete.css
-JS=js/autocomplete.js js/jquery.autocomplete.js
+JS=js/autocomplete.js js/jquery.autocomplete.js js/hide.js
 STATIC=${CSS} ${JS}
 all: debug
 
