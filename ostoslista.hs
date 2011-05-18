@@ -54,7 +54,7 @@ html list = H.docTypeHtml $  do
   where
     items = getAssoc list
     styles = ["css/style.css", "css/jquery.autocomplete.css"]
-    scripts = ["http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" , "js/jquery.autocomplete.js" , "js/autocomplete.js"]
+    scripts = reverse ["http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" , "js/jquery.autocomplete.js" , "js/autocomplete.js"]
     mkfun :: (H.AttributeValue -> H.Html) -> [Text] -> H.Html
     mkfun f = foldr (\x m -> m `mappend` f x) mempty . map H.toValue
     mkstyles = mkfun css
