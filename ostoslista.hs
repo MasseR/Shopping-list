@@ -43,16 +43,19 @@ html list = H.docTypeHtml $  do
     mkscripts scripts
     H.title "Shopping list"
     H.body $ do
-      H.h1 "Shopping list"
-      H.form ! A.method "POST" $ do
-        H.input ! A.id "input" ! A.type_ "text" ! A.name "append"
-        H.input ! A.type_ "submit" ! A.name "Add new"
-      H.p "0 items hidden" ! A.style "display:none" ! A.id "hiddenitems"
-      H.a "show" ! A.href "#" ! A.id "show" ! A.style "display:none"
-      H.form ! A.method "POST" $ do
-        H.ul ! A.id "items" $
-          foldr (\x m -> m `mappend` item x) mempty items
-        H.input ! A.type_ "submit" ! A.value "Clear selected"
+      H.div ! A.id "main" $ do
+        H.h1 "Shopping list"
+        H.div ! A.id "info" $ do
+          H.p "0 items hidden" ! A.style "display:none" ! A.id "hiddenitems"
+          H.a "show" ! A.href "#" ! A.id "show" ! A.style "display:none"
+        H.div ! A.id "form" $ do
+          H.form ! A.method "POST" $ do
+            H.input ! A.id "input" ! A.type_ "text" ! A.name "append"
+            H.input ! A.type_ "submit" ! A.name "Add new"
+          H.form ! A.method "POST" $ do
+            H.ul ! A.id "items" $
+              foldr (\x m -> m `mappend` item x) mempty items
+            H.input ! A.type_ "submit" ! A.value "Clear selected"
   where
     items = getAssoc list
     styles = ["css/style.css", "css/jquery.autocomplete.css"]
