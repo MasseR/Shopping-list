@@ -27,7 +27,22 @@ check x
   | otherwise = outputNothing
 
 cgiMain :: CGIT (StateT ShoppingList IO) CGIResult
-cgiMain = do
+cgiMain = getInput "mode" >>= handler
+
+handler (Just "autocomplete") = completeApp
+handler _ = mainApp
+
+autocomplete :: Maybe Text -> ShoppingList -> Text
+autocomplete Nothing list = getAllAsPlain list
+autocomplete (Just x) list = getFilteredAsPlain x list
+
+completeApp = do
+  input <- getInput "q"
+  list <- lift get
+  setHeader "Content-Type" "text/plain; charset=utf-8"
+  outputText $ autocomplete input list
+
+mainApp = do
   getInput "append" >>= appendNew
   getMultiInput "list" >>= check
   setHeader "Content-Type" "text/html; charset=utf-8"
