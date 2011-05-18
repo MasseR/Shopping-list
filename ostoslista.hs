@@ -62,7 +62,7 @@ html list = H.docTypeHtml $  do
     css x = H.link ! A.rel "stylesheet" ! A.type_ "text/css" ! A.href x
     js x = H.script mempty ! A.type_ "application/javascript" ! A.src x
     item x@(a,b) = H.li ((H.input ! A.name "list" ! A.type_ "checkbox" ! A.value (H.toValue a)) `mappend` itemPP x)
-    itemPP (a,b) = H.toHtml $ (T.unwords [a, "-", (T.pack $ show b)])
+    itemPP (a,b) = H.toHtml $ (T.unwords [(T.pack $ show b), "-", a])
 
 --main ::  IO ()
 main = do
