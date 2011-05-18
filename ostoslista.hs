@@ -4,7 +4,7 @@ import Network.CGI.Text
 import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
 import Text.Blaze.Html5 ((!))
-import Text.Blaze.Renderer.Text
+import Text.Blaze.Renderer.Utf8 (renderHtml)
 import Data.ShoppingList
 import Data.ShoppingList.Persist
 import Control.Monad.State
@@ -27,7 +27,8 @@ check x
   | otherwise = outputNothing
 
 cgiMain :: CGIT (StateT ShoppingList IO) CGIResult
-cgiMain = getInput "mode" >>= handler
+cgiMain = do
+  getInput "mode" >>= handler
 
 handler (Just "autocomplete") = completeApp
 handler _ = mainApp
@@ -37,17 +38,17 @@ autocomplete Nothing list = getAllAsPlain list
 autocomplete (Just x) list = getFilteredAsPlain x list
 
 completeApp = do
+  setHeader "Content-Type" "text/plain; charset=utf-8"
   input <- getInput "q"
   list <- lift get
-  setHeader "Content-Type" "text/plain; charset=utf-8"
   outputText $ autocomplete input list
 
 mainApp = do
+  setHeader "Content-Type" "text/html; charset=utf-8"
   getInput "append" >>= appendNew
   getMultiInput "list" >>= check
-  setHeader "Content-Type" "text/html; charset=utf-8"
   l <- lift get
-  outputText $ renderHtml (html l)
+  outputFPS $ renderHtml (html l)
 
 html :: ShoppingList -> H.Html
 html list = H.docTypeHtml $  do
@@ -57,20 +58,20 @@ html list = H.docTypeHtml $  do
     mkstyles styles
     mkscripts scripts
     H.title "Shopping list"
-    H.body $ do
-      H.div ! A.id "main" $ do
-        H.h1 "Shopping list"
-        H.div ! A.id "info" $ do
-          H.p "0 items hidden" ! A.style "display:none" ! A.id "hiddenitems"
-          H.a "show" ! A.href "#" ! A.id "show" ! A.style "display:none"
-        H.div ! A.id "form" $ do
-          H.form ! A.method "POST" $ do
-            H.input ! A.id "input" ! A.type_ "text" ! A.name "append"
-            H.input ! A.type_ "submit" ! A.name "Add new"
-          H.form ! A.method "POST" $ do
-            H.ul ! A.id "items" $
-              foldr (\x m -> m `mappend` item x) mempty items
-            H.input ! A.type_ "submit" ! A.value "Clear selected"
+  H.body $ do
+    H.div ! A.id "main" $ do
+      H.h1 "Shopping list"
+      H.div ! A.id "info" $ do
+        H.p "0 items hidden" ! A.style "display:none" ! A.id "hiddenitems"
+        H.a "show" ! A.href "#" ! A.id "show" ! A.style "display:none"
+      H.div ! A.id "form" $ do
+        H.form ! A.method "POST" $ do
+          H.input ! A.id "input" ! A.type_ "text" ! A.name "append"
+          H.input ! A.type_ "submit" ! A.name "Add new"
+        H.form ! A.method "POST" $ do
+          H.ul ! A.id "items" $
+            foldr (\x m -> m `mappend` item x) mempty items
+          H.input ! A.type_ "submit" ! A.value "Clear selected"
   where
     items = getAssoc list
     styles = ["css/style.css", "css/jquery.autocomplete.css"]
