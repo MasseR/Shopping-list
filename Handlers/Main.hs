@@ -34,27 +34,27 @@ mainApp = do
   outputFPS $ renderHtml (html l)
 
 html :: ShoppingList -> H.Html
-html list = H.docTypeHtml $
+html list = H.docTypeHtml $ do
   H.head $ do
     H.meta ! A.charset "utf-8"
     H.meta ! A.name "viewport" ! A.content "width=device-width;"
     mkstyles styles
     mkscripts scripts
     H.title "Shopping list"
-    H.body $
-      H.div ! A.id "main" $ do
-        H.h1 "Shopping list"
-        H.div ! A.id "info" $ do
-          H.p "0 items hidden" ! A.style "display:none" ! A.id "hiddenitems"
-          H.a "show" ! A.href "#" ! A.id "show" ! A.style "display:none"
-        H.div ! A.id "form" $ do
-          H.form ! A.id "append" ! A.method "POST" $ do
-            H.input ! A.id "input" ! A.type_ "text" ! A.name "append"
-            H.input ! A.type_ "submit" ! A.value "Add new"
-          H.form ! A.method "POST" $ do
-            H.ul ! A.id "items" $
-              itemlist items
-            H.input ! A.type_ "submit" ! A.value "Clear selected"
+  H.body $ do
+    H.div ! A.id "main" $ do
+      H.h1 "Shopping list"
+      H.div ! A.id "info" $ do
+        H.p "0 items hidden" ! A.id "hiddenitems"
+        H.a "toggle" ! A.href "#" ! A.id "show"
+      H.div ! A.id "form" $ do
+        H.form ! A.id "append" ! A.method "POST" $ do
+          H.input ! A.id "input" ! A.type_ "text" ! A.name "append"
+          H.input ! A.type_ "submit" ! A.value "Add new"
+        H.form ! A.method "POST" $ do
+          H.ul ! A.id "items" $
+            itemlist items
+          H.input ! A.type_ "submit" ! A.value "Clear selected"
   where
     items = getAssoc list
     styles = ["css/style.css", "css/jquery.autocomplete.css"]
@@ -62,8 +62,7 @@ html list = H.docTypeHtml $
         "http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"
       , "js/jquery.autocomplete.js"
       , "js/autocomplete.js"
-      , "js/ajax.js"
-      , "js/hide.js"]
+      , "js/ajax.js"]
     mkfun :: (H.AttributeValue -> H.Html) -> [Text] -> H.Html
     mkfun f = foldr ((\ x m -> m `mappend` f x) . H.toValue) mempty
     mkstyles = mkfun css
@@ -72,7 +71,7 @@ html list = H.docTypeHtml $
     js x = H.script mempty ! A.type_ "application/javascript" ! A.src x
 
 itemlist :: [(Text, Int)] -> H.Html
-itemlist = foldr (\x m -> m `mappend` item x) mempty
+itemlist = foldr (\x m -> m `mappend` item x) mempty . reverse
 item ::  Show a => (Text, a) -> H.Html
 item x@(a,b) = H.li ((H.input ! A.name "list" ! A.type_ "checkbox" ! A.value (H.toValue a)) `mappend` itemPP x)
 itemPP ::  Show a => (Text, a) -> H.Html
