@@ -7,6 +7,7 @@ Data-Files:
     js/autocomplete.js
     js/jquery.autocomplete.js
     js/hide.js
+    js/ajax.js
 
 -- The name of the package.
 Name:                ostoslista
