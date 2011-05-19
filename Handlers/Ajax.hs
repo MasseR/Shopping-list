@@ -11,7 +11,8 @@ import Control.Monad.State (modify, get, lift)
 append Nothing = return False
 append (Just x) = lift (modify (enable x)) >> return True
 
-appendApp :: Shop CGIResult
-appendApp = do
+ajaxApp :: Shop CGIResult
+ajaxApp = do
   _ <- getInput "append" >>= append
+  getMultiInput "list" >>= \x -> lift (modify (disableMulti x))
   lift get >>= \l -> outputFPS $ renderHtml (itemlist $ getAssoc l)

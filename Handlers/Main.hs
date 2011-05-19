@@ -51,7 +51,7 @@ html list = H.docTypeHtml $ do
         H.form ! A.id "append" ! A.method "POST" $ do
           H.input ! A.id "input" ! A.type_ "text" ! A.name "append"
           H.input ! A.type_ "submit" ! A.value "Add new"
-        H.form ! A.method "POST" $ do
+        H.form ! A.id "check" ! A.method "POST" $ do
           H.ul ! A.id "items" $
             itemlist items
           H.input ! A.type_ "submit" ! A.value "Clear selected"

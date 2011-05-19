@@ -34,13 +34,24 @@ function toggle()
 	hideSelected();
 }
 
+function post()
+{
+}
+
 $(document).ready(function() {
     $("#show").click(toggle);
     bindHide();
     $("#append").submit(function() {
-	$.post("ostoslista.cgi?mode=ajaxadd", $(this).serialize(), function(data) {
+	$.post("ostoslista.cgi?mode=ajax", $(this).serialize(), function(data) {
 	    $("#items").html(data);
 	    $("#input").attr("value", "");
+	    bindHide();
+	});
+	return false;
+    });
+    $("#check").submit(function() { /* Need to figure out how to fix the this issue. */
+	$.post("ostoslista.cgi?mode=ajax", $(this).serialize(), function(data) {
+	    $("#items").html(data);
 	    bindHide();
 	});
 	return false;

@@ -17,7 +17,7 @@ cgiMain = getInput "mode" >>= handler
 
 handler :: Maybe Text -> Shop CGIResult
 handler (Just "autocomplete") = completeApp
-handler (Just "ajaxadd") = appendApp
+handler (Just "ajax") = ajaxApp
 handler _ = mainApp
 
 
