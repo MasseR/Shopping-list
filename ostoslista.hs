@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, GeneralizedNewtypeDeriving, OverloadedStrings, QuasiQuotes #-}
+{-# LANGUAGE FlexibleContexts, OverloadedStrings #-}
 module Main where
 import Network.CGI.Text
 import qualified Text.Blaze.Html5 as H
@@ -13,23 +13,26 @@ import Data.Monoid
 import Data.Acid
 import qualified Data.Text.Lazy as T
 
-appendNew :: Maybe Text -> CGIT (StateT ShoppingList IO) CGIResult
+type Shop a = CGIT (StateT ShoppingList IO) a
+
+appendNew :: Maybe Text -> Shop CGIResult
 appendNew Nothing = outputNothing
 appendNew (Just x) = do
   lift $ modify (enable x)
   redirect "ostoslista.cgi"
 
-check :: [Text] -> CGIT (StateT ShoppingList IO) CGIResult
+check :: [Text] -> Shop CGIResult
 check x
   | not (null x) = do
     lift $ modify (disableMulti x)
     redirect "ostoslista.cgi"
   | otherwise = outputNothing
 
-cgiMain :: CGIT (StateT ShoppingList IO) CGIResult
+cgiMain :: Shop CGIResult
 cgiMain = do
   getInput "mode" >>= handler
 
+handler :: Maybe Text -> Shop CGIResult
 handler (Just "autocomplete") = completeApp
 handler _ = mainApp
 
@@ -37,12 +40,14 @@ autocomplete :: Maybe Text -> ShoppingList -> Text
 autocomplete Nothing list = getAllAsPlain list
 autocomplete (Just x) list = getFilteredAsPlain x list
 
+completeApp ::  Shop CGIResult
 completeApp = do
   setHeader "Content-Type" "text/plain; charset=utf-8"
   input <- getInput "q"
   list <- lift get
   outputText $ autocomplete input list
 
+mainApp ::  Shop CGIResult
 mainApp = do
   setHeader "Content-Type" "text/html; charset=utf-8"
   getInput "append" >>= appendNew
