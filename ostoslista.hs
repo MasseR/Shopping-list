@@ -51,7 +51,7 @@ html list = H.docTypeHtml $  do
         H.div ! A.id "form" $ do
           H.form ! A.method "POST" $ do
             H.input ! A.id "input" ! A.type_ "text" ! A.name "append"
-            H.input ! A.type_ "submit" ! A.name "Add new"
+            H.input ! A.type_ "submit" ! A.value "Add new"
           H.form ! A.method "POST" $ do
             H.ul ! A.id "items" $
               foldr (\x m -> m `mappend` item x) mempty items
