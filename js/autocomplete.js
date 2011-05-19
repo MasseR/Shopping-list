@@ -1,4 +1,4 @@
 $(document).ready(function() {
-    $("#input").autocomplete("autocomplete.cgi");
+    $("#input").autocomplete("ostoslista.cgi", {"extraParams" : {"mode" : "autocomplete"}});
     $("#input")[0].focus();
 });
