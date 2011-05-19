@@ -66,7 +66,7 @@ html list = H.docTypeHtml $  do
           H.a "show" ! A.href "#" ! A.id "show" ! A.style "display:none"
         H.div ! A.id "form" $ do
           H.form ! A.method "POST" $ do
-            H.input ! A.id "input" ! A.type_ "text" ! A.value "append"
+            H.input ! A.id "input" ! A.type_ "text" ! A.name "append"
             H.input ! A.type_ "submit" ! A.value "Add new"
           H.form ! A.method "POST" $ do
             H.ul ! A.id "items" $
