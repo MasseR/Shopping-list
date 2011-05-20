@@ -13,6 +13,7 @@ append (Just x) = lift (modify (enable x)) >> return True
 
 ajaxApp :: Shop CGIResult
 ajaxApp = do
+  setHeader "Content-Type" "text/html; charset=utf-8"
   _ <- getInput "append" >>= append
   getMultiInput "list" >>= \x -> lift (modify (disableMulti x))
   lift get >>= \l -> outputFPS $ renderHtml (itemlist $ getAssoc l)
